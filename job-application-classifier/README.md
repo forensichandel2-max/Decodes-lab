@@ -39,7 +39,7 @@ This is a demo/portfolio version. Sensitive data (API keys, real candidate data)
 ![AI Output](./Screenshot_11-6-2026_0743_airtable.com.jpeg)
 
 ### Strong Fit Email Notification
-![Strong Fit Email](./Rename email screenshot)
+![Strong Fit Email](./strong-fit-email.jpeg)
 ## Author
 
 Built by Obidigbo Emmanuel — Pharmacist & AI Automation Specialist
