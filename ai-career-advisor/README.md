@@ -40,3 +40,14 @@ This is a demo/portfolio version. Sensitive data (API keys, real user data) has 
 ## Author
 
 Built by Emmanuel Obidigbo — Pharmacist & AI Automation Specialist
+
+
+## Screenshots
+
+### Workflow Canvas
+![Workflow Canvas](./Screenshot_10-6-2026_173152_handel02.app.n8n.cloud.jpeg)
+
+![Workflow Detail](./Screenshot_10-6-2026_173313_handel02.app.n8n.cloud.jpeg)
+
+### Sample Email Output
+![Career Roadmap Email](./ai-career-advisor-mail.jpeg)
