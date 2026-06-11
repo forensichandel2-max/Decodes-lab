@@ -29,6 +29,17 @@ An AI-powered automation built with n8n that screens job applications and instan
 
 This is a demo/portfolio version. Sensitive data (API keys, real candidate data) has been removed.
 
+
+## Screenshots
+
+### Workflow Canvas
+![Workflow Canvas](./Screenshot_11-6-2026_02231_handel02.app.n8n.cloud.jpeg)
+
+### AI Classification Output
+![AI Output](./Screenshot_11-6-2026_0743_airtable.com.jpeg)
+
+### Strong Fit Email Notification
+![Strong Fit Email](./WhatsApp Image 2026-06-11 at 00.21.31.jpeg)
 ## Author
 
 Built by Obidigbo Emmanuel — Pharmacist & AI Automation Specialist
