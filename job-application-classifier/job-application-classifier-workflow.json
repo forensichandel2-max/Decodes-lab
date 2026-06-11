@@ -1,0 +1,351 @@
+{
+  "name": "Job Application Classifier",
+  "nodes": [
+    {
+      "parameters": {
+        "form": "YOUR_FILLOUT_FORM_ID"
+      },
+      "type": "n8n-nodes-fillout.filloutTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "88d775d0-e8c1-42cd-9186-f8a152ec65ae",
+      "name": "Fillout Trigger",
+      "webhookId": "YOUR_WEBHOOK_ID",
+      "credentials": {
+        "filloutApi": {
+          "id": "YOUR_FILLOUT_CREDENTIAL_ID",
+          "name": "Fillout account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Get the Fillout submission data\nconst filloutData = $('Fillout Trigger').first().json;\n\n// Convert questions object into an array\nconst questionsArray = Object.values(filloutData.questions);\n\n// Helper to get a value by question name\nconst getAnswer = (questionName) =>\n  questionsArray.find(q => q.name === questionName)?.value;\n\nreturn [{\n  json: {\n    fullName: getAnswer('Full Name'),\n    email: getAnswer('Email'),\n    position: getAnswer('Position Applied For'),\n    experience: getAnswer('Years of Experience'),\n    coverLetter: getAnswer('Why do you want this role?')\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        208,
+        0
+      ],
+      "id": "c7f0fffe-149a-4770-ac37-b3c267071ae2",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4.1-mini",
+          "mode": "list",
+          "cachedResultName": "GPT-4.1-MINI"
+        },
+        "responses": {
+          "values": [
+            {
+              "content": "=You are an HR screening assistant. Based on the candidate's application below, classify them into ONE of these categories:\n\n- Strong Fit\n- Potential Fit\n- Not a Fit\n\nPosition applied for: {{ $json.position }}\nYears of experience: {{ $json.experience }}\nCover letter: {{ $json.coverLetter }}\n\nConsider relevance of experience to the position and the quality/clarity of their cover letter.\n\nReturn only the category name, nothing else."
+            }
+          ]
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 2.3,
+      "position": [
+        416,
+        0
+      ],
+      "id": "a97fa6f9-3950-4cd1-b19e-f1d931490dfb",
+      "name": "Message a model",
+      "alwaysOutputData": true,
+      "credentials": {
+        "openAiApi": {
+          "id": "YOUR_OPENAI_CREDENTIAL_ID",
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Get the original application data\nconst data = $('Code in JavaScript').first().json; // adjust name if your extraction node is named differently\n\n// Extract the AI classification\nconst aiResponse = $input.first().json;\nconst classification = aiResponse.output?.[0]?.content?.[0]?.text?.trim() || '';\n\nreturn [{\n  json: {\n    ...data,\n    classification\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        768,
+        0
+      ],
+      "id": "adb31751-da01-4ea0-a597-fa537dab4ccc",
+      "name": "Code in JavaScript1"
+    },
+    {
+      "parameters": {
+        "operation": "create",
+        "base": {
+          "__rl": true,
+          "value": "YOUR_AIRTABLE_BASE_ID",
+          "mode": "list",
+          "cachedResultName": "Applications",
+          "cachedResultUrl": "https://airtable.com/YOUR_AIRTABLE_BASE_ID"
+        },
+        "table": {
+          "__rl": true,
+          "value": "YOUR_TABLE_ID",
+          "mode": "list",
+          "cachedResultName": "Table 1",
+          "cachedResultUrl": "https://airtable.com/YOUR_AIRTABLE_BASE_ID/YOUR_TABLE_ID"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Full Name": "={{ $json.fullName }}",
+            "Position": "={{ $json.position }}",
+            "Email": "={{ $json.email }}",
+            "Experience": "={{ $json.experience }}",
+            "Cover Letter": "={{ $json.coverLetter }}",
+            "Classification": "={{ $json.classification }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Full Name",
+              "displayName": "Full Name",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Position",
+              "displayName": "Position",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Experience",
+              "displayName": "Experience",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Cover Letter",
+              "displayName": "Cover Letter",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Classification",
+              "displayName": "Classification",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        976,
+        0
+      ],
+      "id": "15991a07-0863-446f-b757-5bc290ceea8f",
+      "name": "Create a record",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "YOUR_AIRTABLE_CREDENTIAL_ID",
+          "name": "Airtable account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.fields.Classification }}",
+                    "rightValue": "Strong Fit",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "8e020d02-c043-40cd-a5be-a7f7a3d75784"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Strong Fit"
+            }
+          ]
+        },
+        "options": {
+          "fallbackOutput": "none"
+        }
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        1184,
+        0
+      ],
+      "id": "8ce42cf2-fc0e-4281-9675-2ca2a5c03c53",
+      "name": "Switch",
+      "alwaysOutputData": false
+    },
+    {
+      "parameters": {
+        "sendTo": "your-email@example.com",
+        "subject": "=New Strong Fit Candidate: {{ $('Code in JavaScript').item.json.fullName }} — {{ $('Code in JavaScript').item.json.position }}",
+        "message": "=<div style=\"font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e0e0e0; border-radius: 8px; overflow: hidden;\">    <div style=\"background-color: #2e7d32; color: #ffffff; padding: 16px 24px;\">     <h2 style=\"margin: 0;\">🎯 New Strong Fit Candidate</h2>   </div>    <div style=\"padding: 24px;\">     <p style=\"font-size: 16px; color: #333;\">       A new candidate has been classified as a <strong style=\"color: #2e7d32;\">Strong Fit</strong> for the role below. Details are summarized for quick review.     </p>      <table style=\"width: 100%; border-collapse: collapse; margin-top: 16px;\">       <tr>         <td style=\"padding: 8px; font-weight: bold; width: 160px; border-bottom: 1px solid #eee;\">Name</td>         <td style=\"padding: 8px; border-bottom: 1px solid #eee;\">{{ $('Code in JavaScript1').item.json.fullName }}</td>       </tr>       <tr>         <td style=\"padding: 8px; font-weight: bold; border-bottom: 1px solid #eee;\">Email</td>         <td style=\"padding: 8px; border-bottom: 1px solid #eee;\">{{ $('Code in JavaScript1').item.json.email }}</td>       </tr>       <tr>         <td style=\"padding: 8px; font-weight: bold; border-bottom: 1px solid #eee;\">Position</td>         <td style=\"padding: 8px; border-bottom: 1px solid #eee;\">{{ $('Code in JavaScript1').item.json.position }}</td>       </tr>       <tr>         <td style=\"padding: 8px; font-weight: bold; border-bottom: 1px solid #eee;\">Years of Experience</td>         <td style=\"padding: 8px; border-bottom: 1px solid #eee;\">{{ $('Code in JavaScript1').item.json.experience }}</td>       </tr>       <tr>         <td style=\"padding: 8px; font-weight: bold; vertical-align: top; border-bottom: 1px solid #eee;\">Cover Letter</td>         <td style=\"padding: 8px; border-bottom: 1px solid #eee;\">{{ $('Code in JavaScript1').item.json.coverLetter }}</td>       </tr>       <tr>         <td style=\"padding: 8px; font-weight: bold;\">Classification</td>         <td style=\"padding: 8px;\">           <span style=\"background-color: #e8f5e9; color: #2e7d32; padding: 4px 10px; border-radius: 4px; font-weight: bold;\">       {{ $('Code in JavaScript1').item.json.classification }}                </span>         </td>       </tr>     </table>      <p style=\"margin-top: 24px; font-size: 14px; color: #777;\">       This notification was generated automatically by the Job Application Classifier workflow.     </p>   </div>  </div>",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        1424,
+        -16
+      ],
+      "id": "252e4012-3695-4b8b-a811-4794fd132801",
+      "name": "Send a message",
+      "webhookId": "YOUR_WEBHOOK_ID_2",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "YOUR_GMAIL_CREDENTIAL_ID",
+          "name": "Gmail OAuth2 API"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Fillout Trigger": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Message a model",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message a model": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript1": {
+      "main": [
+        [
+          {
+            "node": "Create a record",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create a record": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "00000000-0000-0000-0000-000000000000",
+  "meta": {
+    "templateCredsSetupCompleted": false,
+    "instanceId": "PLACEHOLDER_INSTANCE_ID"
+  },
+  "id": "U26LVJsHAAxanM8e",
+  "tags": []
+}
