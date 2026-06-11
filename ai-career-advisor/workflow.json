@@ -1,0 +1,431 @@
+{
+  "name": "Ai Career Advisor",
+  "nodes": [
+    {
+      "parameters": {
+        "operation": "search",
+        "base": {
+          "__rl": true,
+          "value": "YOUR_AIRTABLE_BASE_ID",
+          "mode": "list",
+          "cachedResultName": "AI Career Advisor",
+          "cachedResultUrl": "https://airtable.com/YOUR_AIRTABLE_BASE_ID"
+        },
+        "table": {
+          "__rl": true,
+          "value": "YOUR_COURSES_TABLE_ID",
+          "mode": "list",
+          "cachedResultName": "tab 1: Courses",
+          "cachedResultUrl": "https://airtable.com/YOUR_AIRTABLE_BASE_ID/YOUR_COURSES_TABLE_ID"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        224,
+        16
+      ],
+      "id": "6bd27661-a6fe-4b3d-9de3-1777b37eec5e",
+      "name": "Get Courses",
+      "alwaysOutputData": true,
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "YOUR_AIRTABLE_CREDENTIAL_ID",
+          "name": "Airtable account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "search",
+        "base": {
+          "__rl": true,
+          "value": "YOUR_AIRTABLE_BASE_ID",
+          "mode": "list",
+          "cachedResultName": "AI Career Advisor",
+          "cachedResultUrl": "https://airtable.com/YOUR_AIRTABLE_BASE_ID"
+        },
+        "table": {
+          "__rl": true,
+          "value": "YOUR_LEARNING_PATHS_TABLE_ID",
+          "mode": "list",
+          "cachedResultName": "Learning Paths",
+          "cachedResultUrl": "https://airtable.com/YOUR_AIRTABLE_BASE_ID/YOUR_LEARNING_PATHS_TABLE_ID"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        672,
+        -176
+      ],
+      "id": "69ebb164-7d0c-45be-8fde-0c9e38f741f6",
+      "name": "Get Learning Paths",
+      "alwaysOutputData": true,
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "YOUR_AIRTABLE_CREDENTIAL_ID",
+          "name": "Airtable account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "form": "YOUR_FILLOUT_FORM_ID"
+      },
+      "type": "n8n-nodes-fillout.filloutTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        -80
+      ],
+      "id": "df0f9e96-10d9-4826-9d28-6be948be0833",
+      "name": "Fillout Trigger",
+      "webhookId": "YOUR_WEBHOOK_ID",
+      "credentials": {
+        "filloutApi": {
+          "id": "YOUR_FILLOUT_CREDENTIAL_ID",
+          "name": "Fillout account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "maxItems": 5
+      },
+      "type": "n8n-nodes-base.limit",
+      "typeVersion": 1,
+      "position": [
+        672,
+        16
+      ],
+      "id": "a6fc645a-af76-4573-a6ae-b34b6b6d3e12",
+      "name": "Limit",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "jsCode": "const recommendations = [];\n\nfor (const item of items) {\n  const course = item.json.fields;\n\n  recommendations.push({\n    course: course[\"Course Name\"],\n    category: course[\"Category\"],\n    level: course[\"Level\"],\n    career: course[\"Career Path\"],\n    score: 10\n  });\n}\n\nreturn recommendations.map(r => ({ json: r }));"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        448,
+        16
+      ],
+      "id": "32943fa7-5d99-479e-b35a-aa6983289b4c",
+      "name": "Course recommendation Engine",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "jsCode": "const courses = items.map(item => item.json.course);\n\nlet roadmap = '';\n\ncourses.forEach((course,index)=>{\n\nroadmap += `${index+1}. ${course}\\n`;\n\n});\n\nreturn [{\njson:{\nroadmap\n}\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        896,
+        16
+      ],
+      "id": "66237f79-e2b5-4222-b9e4-b50af664c788",
+      "name": "Roadmap Builder"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Get the Fillout submission data\nconst filloutData = $('Fillout Trigger').first().json;\n\n// Convert questions object into an array\nconst questionsArray = Object.values(filloutData.questions);\n\n// Helper to get a value by question name\nconst getAnswer = (questionName) =>\n  questionsArray.find(q => q.name === questionName)?.value;\n\nconst userName = getAnswer('Full Name');\nconst userEmail = getAnswer('Email');\nconst userCareerGoal = getAnswer('Career Goal');\n\n// Get all learning paths from Airtable\nconst learningPaths = $('Get Learning Paths').all();\n\n// Find the matching learning path\nconst matchedPath = learningPaths.find(\n  item => item.json.fields['Career Goal']?.toLowerCase() === userCareerGoal?.toLowerCase()\n);\n\nif (!matchedPath) {\n  return [{\n    json: {\n      error: 'No matching learning path found',\n      userCareerGoal: userCareerGoal\n    }\n  }];\n}\n\nreturn [{\n  json: {\n    userName: userName,\n    userEmail: userEmail,\n    careerGoal: matchedPath.json.fields['Career Goal'],\n    skillsRequired: matchedPath.json.fields['Skills']\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        896,
+        -176
+      ],
+      "id": "c6632ad5-e004-487c-bc4a-f919cf1b1ee1",
+      "name": "find matching career path",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        1120,
+        -80
+      ],
+      "id": "ed47534f-50b6-4a92-953a-c6dbe0d4ca8b",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "jsCode": "const data = $input.first().json;\n\n// Merge node \"Combine\" mode usually outputs both inputs merged into one object,\n// but if they're nested, adjust accordingly\nreturn [{\n  json: {\n    userName: data.userName,\n    userEmail: data.userEmail,\n    careerGoal: data.careerGoal,\n    skillsRequired: data.skillsRequired,\n    roadmap: data.roadmap\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1312,
+        -80
+      ],
+      "id": "6037deb6-6ea9-4800-b490-bc65d12fa7c5",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4.1-mini",
+          "mode": "list",
+          "cachedResultName": "GPT-4.1-MINI"
+        },
+        "responses": {
+          "values": [
+            {
+              "content": "=You are a friendly career advisor AI. Write a short, encouraging personalized message for a user based on their career goal and roadmap.\n\nUser's name: {{ $json.userName }}\nCareer goal: {{ $json.careerGoal }}\nSkills required: {{ $json.skillsRequired.join(', ') }}\nLearning roadmap:\n{{ $json.roadmap }}\n\nWrite a friendly 3-4 sentence intro message congratulating them on choosing this path, briefly mentioning the skills they'll build, and encouraging them to start with the first course in the roadmap. Keep it warm and motivating. Do not repeat the full roadmap list."
+            }
+          ]
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 2.3,
+      "position": [
+        1520,
+        -80
+      ],
+      "id": "7b4704df-52c1-4344-818d-04f10913db50",
+      "name": "Message a model",
+      "credentials": {
+        "openAiApi": {
+          "id": "YOUR_OPENAI_CREDENTIAL_ID",
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Get the flattened data from the node before the AI\nconst data = $('Code in JavaScript').first().json;\n\n// Extract the AI message from the nested structure\nconst aiResponse = $input.first().json;\nconst aiMessage = aiResponse.output?.[0]?.content?.[0]?.text || '';\n\nreturn [{\n  json: {\n    userName: data.userName,\n    userEmail: data.userEmail,\n    careerGoal: data.careerGoal,\n    skillsRequired: data.skillsRequired,\n    roadmap: data.roadmap,\n    aiIntro: aiMessage\n  }\n}];;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1776,
+        -80
+      ],
+      "id": "103ef0af-cbb8-48e4-acb6-8575600ab59c",
+      "name": "Code in JavaScript1"
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $json.userEmail }}",
+        "subject": "=Your Personalized Career Roadmap: {{ $json.careerGoal }}",
+        "message": "=<p>Hi {{ $json.userName }},</p>  <p>{{ $json.aiIntro }}</p>  <p><strong>Your Personalized Roadmap:</strong></p> <p>{{ $json.roadmap.replace(/\\n/g, '<br>') }}</p>  <p><strong>Skills you'll build:</strong> {{ $json.skillsRequired.join(', ') }}</p>  <p>Good luck on your journey!</p>",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        1984,
+        -80
+      ],
+      "id": "0e9e5ac3-4f70-453d-93e0-5165006abe8e",
+      "name": "Send a message",
+      "webhookId": "YOUR_WEBHOOK_ID_2",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "YOUR_GMAIL_CREDENTIAL_ID",
+          "name": "Gmail OAuth2 API"
+        }
+      }
+    }
+  ],
+  "pinData": {
+    "Fillout Trigger": [
+      {
+        "json": {
+          "submissionId": "EXAMPLE_SUBMISSION_ID",
+          "submissionTime": "2026-01-01T00:00:00.000Z",
+          "lastUpdatedAt": "2026-01-01T00:00:00.000Z",
+          "questions": {
+            "vbzx": {
+              "name": "Full Name",
+              "value": "Jane Doe"
+            },
+            "v4mi": {
+              "name": "Email",
+              "value": "jane.doe@example.com"
+            },
+            "suHn": {
+              "name": "Interest Area",
+              "value": "AI Automation"
+            },
+            "iDUw": {
+              "name": "Skill Level",
+              "value": "Intermediate"
+            },
+            "rVK6": {
+              "name": "Career Goal",
+              "value": "Automation Expert"
+            }
+          },
+          "calculations": {},
+          "urlParameters": {},
+          "quiz": {},
+          "documents": {},
+          "scheduling": {},
+          "payments": {}
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ]
+  },
+  "connections": {
+    "Get Courses": {
+      "main": [
+        [
+          {
+            "node": "Course recommendation Engine",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Learning Paths": {
+      "main": [
+        [
+          {
+            "node": "find matching career path",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fillout Trigger": {
+      "main": [
+        [
+          {
+            "node": "Get Courses",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Get Learning Paths",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Limit": {
+      "main": [
+        [
+          {
+            "node": "Roadmap Builder",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Course recommendation Engine": {
+      "main": [
+        [
+          {
+            "node": "Limit",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "find matching career path": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Roadmap Builder": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Message a model",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message a model": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript1": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "00000000-0000-0000-0000-000000000000",
+  "meta": {
+    "templateCredsSetupCompleted": false,
+    "instanceId": "PLACEHOLDER_INSTANCE_ID"
+  },
+  "id": "hVCFG9HK3AeWcp08",
+  "tags": []
+}
