@@ -4,3 +4,4 @@ Internship projects under Decodes labs
 ## Projects
 - [AI Career Advisor](./ai-career-advisor) — AI-powered automation that recommends personalized learning roadmaps based on user goals
 - [Job Application Classifier](./job-application-classifier) — AI-powered HR screening tool that classifies applications and notifies management of strong-fit candidates
+- [Customer Feedback Automation](./customer-feedback-automation) — AI-powered sentiment analysis that logs feedback and alerts management of negative reviews
