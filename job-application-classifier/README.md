@@ -42,4 +42,4 @@ This is a demo/portfolio version. Sensitive data (API keys, real candidate data)
 ![Strong Fit Email](./strong-fit-email.jpeg)
 ## Author
 
-Built by Obidigbo Emmanuel — Pharmacist & AI Automation Specialist
+Built by Emmanuel Obidigbo — Pharmacist & AI Automation Specialist
