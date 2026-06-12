@@ -1,0 +1,295 @@
+{
+  "name": "feedback automation workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "form": "YOUR_FILLOUT_FORM_ID"
+      },
+      "type": "n8n-nodes-fillout.filloutTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "92dc70ce-37bf-4cd5-bc17-56a0ab4a6ab0",
+      "name": "Fillout Trigger",
+      "webhookId": "YOUR_WEBHOOK_ID",
+      "credentials": {
+        "filloutApi": {
+          "id": "YOUR_FILLOUT_CREDENTIAL_ID",
+          "name": "Fillout account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4.1-mini",
+          "mode": "list",
+          "cachedResultName": "GPT-4.1-MINI"
+        },
+        "responses": {
+          "values": [
+            {
+              "content": "=You are a text classification AI.\nClassify the customer feedback into exactly one category:\npositive\nnegative\nneutral\n\nFeedback:\n{{ $json.questions.ccnm.value }}\n\nReturn only the category, in lowercase, with no punctuation or extra text."
+            }
+          ]
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 2.3,
+      "position": [
+        208,
+        0
+      ],
+      "id": "62cbf3c1-c5b5-43fa-b2d9-17928b2daaff",
+      "name": "Message a model",
+      "credentials": {
+        "openAiApi": {
+          "id": "YOUR_OPENAI_CREDENTIAL_ID",
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "return items.map(item => {\n  const text = (item.json.text || \"\").toLowerCase();\n  const category = (item.json.category || \"\").toLowerCase();\n\n  // Negative keywords\n  const negativeWords = [\n    \"bad\",\n    \"poor\",\n    \"terrible\",\n    \"awful\",\n    \"disappointed\",\n    \"unhappy\",\n    \"slow\",\n    \"worst\",\n    \"hate\",\n    \"complaint\",\n    \"issue\",\n    \"problem\"\n  ];\n\n  // Positive keywords\n  const positiveWords = [\n    \"good\",\n    \"great\",\n    \"excellent\",\n    \"amazing\",\n    \"happy\",\n    \"satisfied\",\n    \"love\",\n    \"fantastic\",\n    \"awesome\",\n    \"recommend\"\n  ];\n\n  let sentiment = \"Neutral\";\n\n  // Check category first\n  if (category.includes(\"negative\")) {\n    sentiment = \"Negative\";\n  } else if (category.includes(\"positive\")) {\n    sentiment = \"Positive\";\n  } else {\n    // Check text content\n    const hasNegative = negativeWords.some(word => text.includes(word));\n    const hasPositive = positiveWords.some(word => text.includes(word));\n\n    if (hasNegative) {\n      sentiment = \"Negative\";\n    } else if (hasPositive) {\n      sentiment = \"Positive\";\n    }\n  }\n\n  return {\n    json: {\n      ...item.json,\n      sentiment\n    }\n  };\n});"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        528,
+        0
+      ],
+      "id": "1a5653ab-bf3f-469c-9d6b-f008311ed0dd",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "sendTo": "your-email@example.com",
+        "subject": "Negative Feedback notification",
+        "message": "=<!DOCTYPE html>\n<html>\n<head>\n    <meta charset=\"UTF-8\">\n</head>\n<body style=\"font-family: Arial, sans-serif; background-color:#f4f4f4; padding:20px;\">\n\n    <div style=\"background:#ffffff; padding:20px; border-radius:8px;\">\n\n        <h2>🚨 Customer Feedback Alert</h2>\n\n        <hr>\n\n        <p>\n            <strong>Customer Name:</strong>\n            {{$('Fillout Trigger').item.json.questions.ssL9.value}}\n        </p>\n\n        <p>\n            <strong>Feedback:</strong>\n        </p>\n\n        <div style=\"background:#f8f9fa; padding:15px; border-left:4px solid #ccc;\">\n            {{$('Fillout Trigger').item.json.questions.ccnm.value}}\n        </div>\n\n    </div>\n\n</body>\n</html>",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        1328,
+        -16
+      ],
+      "id": "99a90b6f-433f-4f4a-99fb-a087fc1ddc6e",
+      "name": "Send a message",
+      "webhookId": "YOUR_WEBHOOK_ID_2",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "YOUR_GMAIL_CREDENTIAL_ID",
+          "name": "Gmail OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "create",
+        "base": {
+          "__rl": true,
+          "value": "YOUR_AIRTABLE_BASE_ID",
+          "mode": "list",
+          "cachedResultName": "Customer Feedback",
+          "cachedResultUrl": "https://airtable.com/YOUR_AIRTABLE_BASE_ID"
+        },
+        "table": {
+          "__rl": true,
+          "value": "YOUR_TABLE_ID",
+          "mode": "list",
+          "cachedResultName": "Table 1",
+          "cachedResultUrl": "https://airtable.com/YOUR_AIRTABLE_BASE_ID/YOUR_TABLE_ID"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Name": "={{ $('Fillout Trigger').item.json.questions.ssL9.value }}",
+            "feedback": "={{ $('Fillout Trigger').item.json.questions.ccnm.value }}",
+            "Email": "={{ $('Fillout Trigger').item.json.questions.cnUF.value }}",
+            "category": "={{ $json.output[0].content[0].text }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Name",
+              "displayName": "Name",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "feedback",
+              "displayName": "feedback",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "category",
+              "displayName": "category",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        784,
+        0
+      ],
+      "id": "4623d85b-23a8-4b07-a295-fb11af5b263f",
+      "name": "Create a record",
+      "alwaysOutputData": true,
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "YOUR_AIRTABLE_CREDENTIAL_ID",
+          "name": "Airtable account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "2ce132ce-a946-4830-8079-cd31398317a6",
+              "leftValue": "={{ $json.fields.category }}",
+              "rightValue": "negative",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        1008,
+        0
+      ],
+      "id": "3dfbbab3-4a23-48cf-8037-c92f2c813888",
+      "name": "If",
+      "alwaysOutputData": true
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Fillout Trigger": {
+      "main": [
+        [
+          {
+            "node": "Message a model",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message a model": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Create a record",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create a record": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "00000000-0000-0000-0000-000000000000",
+  "meta": {
+    "templateCredsSetupCompleted": false,
+    "instanceId": "PLACEHOLDER_INSTANCE_ID"
+  },
+  "nodeGroups": [],
+  "id": "wBbGla6Lu594SGDZ",
+  "tags": []
+}
