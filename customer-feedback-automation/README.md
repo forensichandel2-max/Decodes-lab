@@ -30,6 +30,14 @@ An AI-powered automation built with n8n that classifies customer feedback by sen
 
 This is a demo/portfolio version. Sensitive data (API keys, real customer data) has been removed.
 
+## Screenshots
+
+### Workflow Canvas
+![Workflow Canvas](./Screenshot_12-6-2026_155059_handel03.app.n8n.cloud.jpeg)
+
+### Negative Feedback Email Alert
+![Email Alert](./Negative-Feedback-mail-alert.jpeg)
+
 ## Author
 
 Built by Emmanuel Obidigbo — Pharmacist & AI Automation Specialist
