@@ -15,7 +15,7 @@ An AI-powered automation built with n8n that classifies customer feedback by sen
 - **n8n** – workflow automation
 - **OpenAI** – sentiment classification
 - **Airtable** – feedback database
-- **Fillout** – feedback form intake
+- **Fillout** – feedback forms intake
 - **Gmail** – management alerts
 
 ## Setup
