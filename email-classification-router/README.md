@@ -34,7 +34,7 @@ This is a demo/portfolio version. Sensitive data (API keys, channel IDs) has bee
 ![Workflow Canvas](./Screenshot_13-6-2026_51127_handel03.app.n8n.cloud.jpeg)
 
 ### Slack Notification Example
-![Slack Notification](./Screenshot_13-6-2026_5113_app.slack.com.jpeg)
+![Slack Notification](./Screenshot_13-6-2026_52317_app.slack.com.jpeg)
 ## Author
 
 Built by Emmanuel Obidigbo — Pharmacist & AI Automation Specialist
