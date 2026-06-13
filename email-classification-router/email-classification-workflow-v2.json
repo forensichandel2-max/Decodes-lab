@@ -1,0 +1,493 @@
+{
+  "name": "Email classification -Handel",
+  "nodes": [
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{$json.category}}",
+                    "rightValue": "Marketing",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "841e5284-dc81-4708-88a6-d3e4c7f82c44"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Marketing"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "ebc996a4-a0d5-4610-98eb-03e3bb31f294",
+                    "leftValue": "={{$json.category}}",
+                    "rightValue": "HR",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "HR"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "0d98acf8-598f-44d5-b051-b23a11c2da2c",
+                    "leftValue": "={{$json.category}}",
+                    "rightValue": "Sales",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Sales"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "67adafe4-8022-4d37-9f1d-9867457bbcce",
+                    "leftValue": "={{$json.category}}",
+                    "rightValue": "Customer Service",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Customer Services"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        336,
+        176
+      ],
+      "id": "e0bb5b55-93a6-4b79-a960-85a1fc56dae5",
+      "name": "Switch",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Email Subject: {{ $('Gmail Trigger').item.json.subject }}\n\nEmail Body:{{ $('Gmail Trigger').item.json.snippet }}\n\n\n{\n  \"category\": \"string\",\n  \"summary\": \"string\"\n}\n",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "You are an intelligent email classification assistant for a company. Your job is to read incoming emails and:\n\n1. Classify the email into EXACTLY ONE of these departments:\n   - Sales\n   - HR\n   - Marketing\n   - Customer Service\n\n2. Write a clear, professional summary of the email (3-5 sentences) that explains exactly what the email is about — including key details like names, dates, amounts, requests, or issues mentioned. The summary should give the reading team enough context to understand the email WITHOUT needing to open it.\n\nClassification guidance:\n- Sales: inquiries about pricing, quotes, purchases, deals, contracts, leads, orders, invoices, payment negotiations\n- HR: employee matters, payroll, leave requests, recruitment, interviews, onboarding, benefits, performance, resignations\n- Marketing: campaigns, branding, promotions, content requests, social media, press releases, partnerships, advertising\n- Customer Service: complaints, support requests, product issues, refunds, returns, general customer questions or feedback\n\nIf an email could fit multiple categories, choose the one that reflects the PRIMARY intent or action needed.\n\nReturn ONLY valid JSON in this exact format:\n\n{\n  \"category\": \"Sales\",\n  \"summary\": \"Brief but detailed summary explaining what the email is about.\"\n}\n\nRules:\n- Do NOT include explanations outside the JSON\n- Do NOT use markdown or code blocks\n- Output must be valid JSON only\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        -224,
+        208
+      ],
+      "id": "4120e83c-3f6f-4db2-bb2b-4486959a49bf",
+      "name": "AI Agent",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4.1-mini",
+          "mode": "list",
+          "cachedResultName": "gpt-4.1-mini"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        -272,
+        448
+      ],
+      "id": "de626b01-582c-4f15-8359-d60ed6470a10",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "YOUR_OPENAI_CREDENTIAL_ID",
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\n\nreturn items.map((item, index) => {\n  const data = item.json;\n\n  // Explicitly preserve all original email fields from Gmail Trigger\n  const id = data.id;\n  const threadId = data.threadId;\n  const from = data.from;\n  const to = data.to;\n  const subject = data.subject;\n  const date = data.date;\n  const snippet = data.snippet;\n  const textPlain = data.textPlain;\n  const textHtml = data.textHtml;\n  const labelIds = data.labelIds;\n  const sizeEstimate = data.sizeEstimate;\n  const internalDate = data.internalDate;\n  const headers = data.headers;\n  const attachments = data.attachments;\n\n  // Build combined text for keyword matching\n  const body = (textPlain || textHtml || \"\").toString();\n  const fullText = `${subject || \"\"} ${body}`.toLowerCase();\n\n  // Keyword sets for each department\n  const keywords = {\n    \"Sales\": [\n      \"sale\", \"sales\", \"quote\", \"pricing\", \"price\", \"purchase\", \"order\",\n      \"deal\", \"discount\", \"proposal\", \"contract\", \"revenue\", \"lead\",\n      \"prospect\", \"negotiation\", \"invoice\", \"payment terms\"\n    ],\n    \"HR\": [\n      \"hr\", \"human resources\", \"payroll\", \"salary\", \"leave\", \"vacation\",\n      \"interview\", \"recruitment\", \"hiring\", \"onboarding\", \"resignation\",\n      \"benefits\", \"employee\", \"performance review\", \"contract renewal\",\n      \"sick leave\", \"promotion\"\n    ],\n    \"Marketing\": [\n      \"marketing\", \"campaign\", \"advertisement\", \"promotion\", \"branding\",\n      \"social media\", \"newsletter\", \"seo\", \"content\", \"influencer\",\n      \"launch\", \"press release\", \"audience\", \"engagement\", \"analytics\"\n    ],\n    \"Customer Service\": [\n      \"support\", \"customer\", \"complaint\", \"issue\", \"problem\", \"refund\",\n      \"return\", \"help\", \"ticket\", \"feedback\", \"service\", \"assistance\",\n      \"trouble\", \"not working\", \"broken\", \"delay\", \"cancellation\"\n    ]\n  };\n\n  // Score each department based on number of keyword matches\n  const scores = {};\n\n  for (const [department, words] of Object.entries(keywords)) {\n    scores[department] = words.reduce((count, word) => {\n      return fullText.includes(word) ? count + 1 : count;\n    }, 0);\n  }\n\n  // Find the department with the highest score\n  let category = \"Unclassified\";\n  let maxScore = 0;\n\n  for (const [department, score] of Object.entries(scores)) {\n    if (score > maxScore) {\n      maxScore = score;\n      category = department;\n    }\n  }\n\n  return {\n    json: {\n      // Explicitly preserved original fields\n      id,\n      threadId,\n      from,\n      to,\n      subject,\n      date,\n      snippet,\n      textPlain,\n      textHtml,\n      labelIds,\n      sizeEstimate,\n      internalDate,\n      headers,\n      attachments,\n\n      // Additional fields for downstream nodes\n      body,\n      category,\n      categoryScores: scores\n    },\n    pairedItem: index\n  };\n});"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -480,
+        208
+      ],
+      "id": "e91f680c-40f9-4294-8665-888dbffca01a",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "schemaType": "manual",
+        "inputSchema": "{\n  \"type\": \"object\",\n  \"properties\": {\n    \"category\": {\n      \"type\": \"string\"\n    },\n    \"summary\": {\n      \"type\": \"string\"\n    }\n  },\n  \"required\": [\"category\", \"summary\"]\n}\n"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        -64,
+        480
+      ],
+      "id": "3a72cbb3-38a5-4b77-93dc-fe9288d7652d",
+      "name": "Structured Output Parser"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "dd570b5e-3d3e-4d63-8678-b62308b24bde",
+              "name": "=category",
+              "value": "={{$json.output.category}}",
+              "type": "string"
+            },
+            {
+              "id": "03039ebb-acd4-491c-9318-e9df07a3ba22",
+              "name": "=summary",
+              "value": "={{$json.output.summary}}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        128,
+        208
+      ],
+      "id": "2db43815-4847-4cda-97f1-2dc52c073b83",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "value": "YOUR_SLACK_CHANNEL_ID_MARKETING",
+          "mode": "list",
+          "cachedResultName": "marketing"
+        },
+        "text": "=📩 New Email for Marketing Team\n\nCategory: {{ $('AI Agent').item.json.output.category }}\n\nSummary:\n{{ $('AI Agent').item.json.output.summary }}\n\nPlease review and respond accordingly.\n",
+        "otherOptions": {
+          "includeLinkToWorkflow": false
+        }
+      },
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.4,
+      "position": [
+        656,
+        -128
+      ],
+      "id": "ab8b428d-bc67-4e87-8cc5-7320590f796c",
+      "name": "MARKETING DEPARTMENT",
+      "webhookId": "YOUR_WEBHOOK_ID_1",
+      "credentials": {
+        "slackOAuth2Api": {
+          "id": "YOUR_SLACK_CREDENTIAL_ID",
+          "name": "Slack OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "select": "=channel",
+        "channelId": {
+          "__rl": true,
+          "value": "YOUR_SLACK_CHANNEL_ID_HR",
+          "mode": "list",
+          "cachedResultName": "hr"
+        },
+        "user": {
+          "__rl": true,
+          "mode": "list",
+          "value": ""
+        },
+        "text": "=📩 New Email for HR Team  \n\nCategory: {{ $('AI Agent').item.json.output.category }} \n\nSummary: {{ $('AI Agent').item.json.output.summary }}  Please review and respond accordingly.",
+        "otherOptions": {
+          "includeLinkToWorkflow": false
+        }
+      },
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.4,
+      "position": [
+        656,
+        64
+      ],
+      "id": "62887ae6-b0f0-4ba8-bb02-6ba4f1847efc",
+      "name": "HR",
+      "webhookId": "YOUR_WEBHOOK_ID_2",
+      "credentials": {
+        "slackOAuth2Api": {
+          "id": "YOUR_SLACK_CREDENTIAL_ID",
+          "name": "Slack OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "value": "YOUR_SLACK_CHANNEL_ID_CUSTOMER_SERVICE",
+          "mode": "list",
+          "cachedResultName": "customer-service"
+        },
+        "text": "=📩 New Email for Customer Service Team  \n\nCategory:  {{ $('AI Agent').item.json.output.category }}\n\nSummary: {{ $('AI Agent').item.json.output.summary }}  Please review and respond accordingly.",
+        "otherOptions": {
+          "includeLinkToWorkflow": false
+        }
+      },
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.4,
+      "position": [
+        656,
+        432
+      ],
+      "id": "9972aa6b-c781-4db8-bb7b-0f686bff0876",
+      "name": "customer service",
+      "webhookId": "YOUR_WEBHOOK_ID_3",
+      "credentials": {
+        "slackOAuth2Api": {
+          "id": "YOUR_SLACK_CREDENTIAL_ID",
+          "name": "Slack OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "value": "YOUR_SLACK_CHANNEL_ID_SALES",
+          "mode": "list",
+          "cachedResultName": "sales"
+        },
+        "text": "=📩 New Email for Sales Team  \n\nCategory: {{$json.category}}  \n\nSummary: {{$json.summary}}  Please review and respond accordingly.",
+        "otherOptions": {
+          "includeLinkToWorkflow": false
+        }
+      },
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.4,
+      "position": [
+        656,
+        256
+      ],
+      "id": "7a922833-6280-4385-ab2a-07614d5e0e3a",
+      "name": "sales",
+      "webhookId": "YOUR_WEBHOOK_ID_4",
+      "credentials": {
+        "slackOAuth2Api": {
+          "id": "YOUR_SLACK_CREDENTIAL_ID",
+          "name": "Slack OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "filters": {}
+      },
+      "type": "n8n-nodes-base.gmailTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        -720,
+        208
+      ],
+      "id": "075387f3-5e28-40e2-8039-90ab99cc281c",
+      "name": "Gmail Trigger",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "YOUR_GMAIL_CREDENTIAL_ID",
+          "name": "Gmail OAuth2 API"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "MARKETING DEPARTMENT",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "HR",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "sales",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "customer service",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gmail Trigger": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "00000000-0000-0000-0000-000000000000",
+  "meta": {
+    "templateCredsSetupCompleted": false,
+    "instanceId": "PLACEHOLDER_INSTANCE_ID"
+  },
+  "nodeGroups": [],
+  "id": "to64LmxnBc74GnbO",
+  "tags": []
+}
