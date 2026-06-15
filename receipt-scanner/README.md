@@ -46,3 +46,14 @@ This is a demo/portfolio version. Sensitive data (API keys, real receipt data) h
 ## Author
 
 Built by Emmanuel Obidigbo — Pharmacist & AI Automation Specialist
+
+## Screenshots
+
+### Workflow Canvas
+![Workflow Canvas](./Screenshot_15-6-2026_1650_handel03.app.n8n.cloud.jpeg)
+
+### Airtable Logs 
+![AI Output](./Screenshot_15-6-2026_16439_airtable.com.jpeg)
+
+### Receipt Email Notification
+![Strong Fit Email](./Receipt-email.jpeg)
