@@ -1,0 +1,395 @@
+{
+  "name": "Receipt scanner",
+  "nodes": [
+    {
+      "parameters": {
+        "form": "YOUR_FILLOUT_FORM_ID"
+      },
+      "type": "n8n-nodes-fillout.filloutTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "30b3747a-4562-4110-b830-442155154e48",
+      "name": "Fillout Trigger",
+      "webhookId": "YOUR_WEBHOOK_ID",
+      "credentials": {
+        "filloutApi": {
+          "id": "YOUR_FILLOUT_CREDENTIAL_ID",
+          "name": "Fillout account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const data = $input.first().json;\n\nconst questions = data.questions;\n\n// Extract each field by name\nconst fullName = Object.values(questions).find(q => q.name === 'Full Name')?.value || '';\nconst receiptImageUrl = Object.values(questions).find(q => q.name === 'Receipt Image')?.value?.[0]?.url || '';\nconst notes = Object.values(questions).find(q => q.name === 'Notes')?.value || '';\n\nreturn [{\n  json: {\n    fullName,\n    receiptImageUrl,\n    notes\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        208,
+        0
+      ],
+      "id": "10bc1471-2829-42c7-b27f-880f12de010e",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4.1-mini",
+          "mode": "list",
+          "cachedResultName": "GPT-4.1-MINI"
+        },
+        "responses": {
+          "values": [
+            {
+              "content": "=Image: {{ $json.receiptImageUrl }}\nText : You are a receipt and invoice data extraction assistant. \n\nCarefully analyze this receipt/invoice image and extract ALL available information.\n\nReturn ONLY valid JSON in this exact format — no markdown, no extra text:\n\n{\n  \"vendor\": \"Store or company name\",\n  \"date\": \"Date on receipt (YYYY-MM-DD format if possible)\",\n  \"total_amount\": 0.00,\n  \"currency\": \"USD\",\n  \"category\": \"one of: Food, Travel, Office Supplies, Utilities, Entertainment, Medical, Shopping, Other\",\n  \"items\": \"Comma-separated list of items purchased\",\n  \"payment_method\": \"Cash/Card/Transfer etc if visible\",\n  \"receipt_number\": \"Receipt or invoice number if visible, otherwise null\"\n}\n\nIf any field is not visible or unclear on the receipt, use null for that field."
+            }
+          ]
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 2.3,
+      "position": [
+        416,
+        0
+      ],
+      "id": "d60657de-2d32-403d-9143-55fe0523e928",
+      "name": "Message a model",
+      "credentials": {
+        "openAiApi": {
+          "id": "YOUR_OPENAI_CREDENTIAL_ID",
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Get the original form data\nconst formData = $('Code in JavaScript').first().json;\n\n// Get the AI response text\nconst aiText = $input.first().json.output?.[0]?.content?.[0]?.text || '';\n\n// Parse the JSON from AI response\nlet extracted = {};\ntry {\n  // Clean any potential markdown fences just in case\n  const cleaned = aiText.replace(/```json|```/g, '').trim();\n  extracted = JSON.parse(cleaned);\n} catch (e) {\n  extracted = {\n    vendor: null,\n    date: null,\n    total_amount: null,\n    currency: null,\n    category: null,\n    items: null,\n    payment_method: null,\n    receipt_number: null\n  };\n}\n\nreturn [{\n  json: {\n    submittedBy: formData.fullName,\n    receiptImageUrl: formData.receiptImageUrl,\n    notes: formData.notes,\n    vendor: extracted.vendor,\n    date: extracted.date,\n    totalAmount: extracted.total_amount,\n    currency: extracted.currency,\n    category: extracted.category,\n    items: extracted.items,\n    paymentMethod: extracted.payment_method,\n    receiptNumber: extracted.receipt_number\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        768,
+        0
+      ],
+      "id": "efb7c3f2-5c59-4c00-893e-aacc1b5210da",
+      "name": "Code in JavaScript1"
+    },
+    {
+      "parameters": {
+        "operation": "create",
+        "base": {
+          "__rl": true,
+          "value": "YOUR_AIRTABLE_BASE_ID",
+          "mode": "list",
+          "cachedResultName": "Receipt Tracker",
+          "cachedResultUrl": "https://airtable.com/YOUR_AIRTABLE_BASE_ID"
+        },
+        "table": {
+          "__rl": true,
+          "value": "YOUR_TABLE_ID",
+          "mode": "list",
+          "cachedResultName": "Table 1",
+          "cachedResultUrl": "https://airtable.com/YOUR_AIRTABLE_BASE_ID/YOUR_TABLE_ID"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Vendor": "={{ $json.vendor }}",
+            "Date": "={{ $json.date }}",
+            "Amount": "={{ $json.totalAmount }}",
+            "Currency": "={{ $json.currency }}",
+            "Category": "={{ $json.category }}",
+            "Items": "={{ $json.items }}",
+            "Submitted By": "={{ $json.submittedBy }}",
+            "Receipt Image": "={{ [{\"url\": $json.receiptImageUrl}] }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Vendor",
+              "displayName": "Vendor",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Date",
+              "displayName": "Date",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Amount",
+              "displayName": "Amount",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Currency",
+              "displayName": "Currency",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Category",
+              "displayName": "Category",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "options",
+              "options": [
+                {
+                  "name": "Food",
+                  "value": "Food"
+                },
+                {
+                  "name": "Utilities",
+                  "value": "Utilities"
+                },
+                {
+                  "name": "Office Supply",
+                  "value": "Office Supply"
+                },
+                {
+                  "name": "Travel",
+                  "value": "Travel"
+                },
+                {
+                  "name": "Entertainment",
+                  "value": "Entertainment"
+                },
+                {
+                  "name": "Medical",
+                  "value": "Medical"
+                },
+                {
+                  "name": "Shopping",
+                  "value": "Shopping"
+                },
+                {
+                  "name": "Other",
+                  "value": "Other"
+                }
+              ],
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Items",
+              "displayName": "Items",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Submitted By",
+              "displayName": "Submitted By",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Receipt Image",
+              "displayName": "Receipt Image",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "array",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {
+          "typecast": true
+        }
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.2,
+      "position": [
+        960,
+        0
+      ],
+      "id": "d37dea05-3324-4935-811c-32b15a042a1d",
+      "name": "Create a record",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "YOUR_AIRTABLE_CREDENTIAL_ID",
+          "name": "Airtable account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "your-email@example.com",
+        "subject": "=New Receipt Logged: {{ $json.fields.Vendor }} — {{ $json.fields.Amount }} {{ $json.fields.Currency }}",
+        "message": "=<div style=\"font-family: Arial, sans-serif; max-width: 500px; margin: 0 auto; border: 1px solid #e0e0e0; border-radius: 8px; overflow: hidden;\">\n\n  <div style=\"background-color: #1976d2; color: #ffffff; padding: 16px 24px;\">\n    <h2 style=\"margin: 0;\">🧾 New Receipt Logged</h2>\n  </div>\n\n  <div style=\"padding: 24px;\">\n    <p style=\"font-size: 15px; color: #333;\">A new receipt has been scanned and logged automatically.</p>\n\n    <table style=\"width: 100%; border-collapse: collapse; margin-top: 16px;\">\n      <tr>\n        <td style=\"padding: 8px; font-weight: bold; width: 140px; border-bottom: 1px solid #eee;\">Vendor</td>\n        <td style=\"padding: 8px; border-bottom: 1px solid #eee;\">{{ $('Code in JavaScript1').item.json.vendor }}</td>\n      </tr>\n      <tr>\n        <td style=\"padding: 8px; font-weight: bold; border-bottom: 1px solid #eee;\">Date</td>\n        <td style=\"padding: 8px; border-bottom: 1px solid #eee;\">{{ $('Code in JavaScript1').item.json.date }}</td>\n      </tr>\n      <tr>\n        <td style=\"padding: 8px; font-weight: bold; border-bottom: 1px solid #eee;\">Amount</td>\n        <td style=\"padding: 8px; border-bottom: 1px solid #eee;\">{{ $('Code in JavaScript1').item.json.totalAmount }} {{ $('Code in JavaScript1').item.json.currency }}</td>\n      </tr>\n      <tr>\n        <td style=\"padding: 8px; font-weight: bold; border-bottom: 1px solid #eee;\">Category</td>\n        <td style=\"padding: 8px; border-bottom: 1px solid #eee;\">{{ $('Code in JavaScript1').item.json.category }}</td>\n      </tr>\n      <tr>\n        <td style=\"padding: 8px; font-weight: bold; border-bottom: 1px solid #eee;\">Items</td>\n        <td style=\"padding: 8px; border-bottom: 1px solid #eee;\">{{ $('Code in JavaScript1').item.json.items }}</td>\n      </tr>\n      <tr>\n        <td style=\"padding: 8px; font-weight: bold; border-bottom: 1px solid #eee;\">Payment Method</td>\n        <td style=\"padding: 8px; border-bottom: 1px solid #eee;\">{{ $('Code in JavaScript1').item.json.paymentMethod }}</td>\n      </tr>\n      <tr>\n        <td style=\"padding: 8px; font-weight: bold; border-bottom: 1px solid #eee;\">Receipt Number</td>\n        <td style=\"padding: 8px; border-bottom: 1px solid #eee;\">{{ $('Code in JavaScript1').item.json.receiptNumber }}</td>\n      </tr>\n      <tr>\n        <td style=\"padding: 8px; font-weight: bold; border-bottom: 1px solid #eee;\">Submitted By</td>\n        <td style=\"padding: 8px; border-bottom: 1px solid #eee;\">{{ $('Code in JavaScript1').item.json.submittedBy }}</td>\n      </tr>\n      <tr>\n        <td style=\"padding: 8px; font-weight: bold;\">Notes</td>\n        <td style=\"padding: 8px;\">{{ $('Code in JavaScript1').item.json.notes }}</td>\n      </tr>\n    </table>\n\n    <p style=\"margin-top: 24px; font-size: 13px; color: #777;\">\n      This notification was generated automatically by the Receipt Scanner workflow.\n    </p>\n  </div>\n\n</div>",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        1168,
+        0
+      ],
+      "id": "f3ce6cb9-768b-4efd-878c-eb8796d99ab1",
+      "name": "Send a message",
+      "webhookId": "YOUR_WEBHOOK_ID_2",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "YOUR_GMAIL_CREDENTIAL_ID",
+          "name": "Gmail OAuth2 API"
+        }
+      }
+    }
+  ],
+  "pinData": {
+    "Fillout Trigger": [
+      {
+        "json": {
+          "submissionId": "EXAMPLE_SUBMISSION_ID",
+          "submissionTime": "2026-01-01T00:00:00.000Z",
+          "lastUpdatedAt": "2026-01-01T00:00:00.000Z",
+          "questions": {
+            "8Rod": {
+              "name": "Full Name",
+              "value": "Jane Doe"
+            },
+            "oZy2": {
+              "name": "Receipt Image",
+              "value": [
+                {
+                  "url": "https://example.com/sample-receipt.jpg",
+                  "filename": "sample-receipt.jpg"
+                }
+              ]
+            },
+            "gJkc": {
+              "name": "Notes",
+              "value": "Sample notes about this receipt"
+            }
+          },
+          "calculations": {},
+          "urlParameters": {},
+          "quiz": {},
+          "documents": {},
+          "scheduling": {},
+          "payments": {}
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ]
+  },
+  "connections": {
+    "Fillout Trigger": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Message a model",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message a model": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript1": {
+      "main": [
+        [
+          {
+            "node": "Create a record",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create a record": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "00000000-0000-0000-0000-000000000000",
+  "meta": {
+    "templateCredsSetupCompleted": false,
+    "instanceId": "PLACEHOLDER_INSTANCE_ID"
+  },
+  "nodeGroups": [],
+  "id": "qBsi8pAiwJqDTogS",
+  "tags": []
+}
