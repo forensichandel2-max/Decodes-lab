@@ -6,3 +6,4 @@ Internship projects under Decodes labs
 - [Job Application Classifier](./job-application-classifier) — AI-powered HR screening tool that classifies applications and notifies management of strong-fit candidates
 - [Customer Feedback Automation](./customer-feedback-automation) — AI-powered sentiment analysis that logs feedback and alerts management of negative reviews
 - [Email Classification & Department Router](./email-classification-router) — AI-powered Gmail automation that classifies emails by department and routes them to Slack
+- [AI Receipt & Invoice Scanner](./receipt-scanner) — AI vision automation that scans receipt images, extracts data, logs to Airtable and notifies via email
