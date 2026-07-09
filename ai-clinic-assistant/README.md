@@ -75,7 +75,7 @@ Built by Emmanuel Obidigbo — Pharmacist & AI Automation Specialist
 ## Screenshots
 
 ### Medium Risk Medication Review
-![Appointment Booking](./Medium_risk.jpeg)
+![Medication Alert](./Medium_risk.jpeg)
 
 ### Booking Confirmation Email
 ![Booking Confirmation Email](./Appointment_booked.jpeg)
@@ -85,3 +85,6 @@ Built by Emmanuel Obidigbo — Pharmacist & AI Automation Specialist
 
 ### Weekly Reminder Email
 ![Weekly Reminder](./Appointment_reminder.jpeg)
+
+### Workflow Canvas
+![Workflow Image](./Medium_risk.jpeg)
