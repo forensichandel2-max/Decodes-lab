@@ -87,4 +87,10 @@ Built by Emmanuel Obidigbo — Pharmacist & AI Automation Specialist
 ![Weekly Reminder](./Appointment_reminder.jpeg)
 
 ### Workflow Canvas
-![Workflow Image](./Medium_risk.jpeg)
+![Workflow Image](./Screenshot_9-7-2026_44423_handel05.app.n8n.cloud.jpeg)
+
+### Workflow Canvas
+![Workflow Image](./Screenshot_9-7-2026_44457_handel05.app.n8n.cloud.jpeg)
+
+### Workflow Canvas
+![Workflow Image](./Screenshot_9-7-2026_44527_handel05.app.n8n.cloud.jpeg)
