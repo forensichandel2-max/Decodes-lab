@@ -71,3 +71,17 @@ This is a demo/portfolio version. All sensitive data (API keys, real patient dat
 ## Author
 
 Built by Emmanuel Obidigbo — Pharmacist & AI Automation Specialist
+
+## Screenshots
+
+### Appointment Booking Chat
+![Appointment Booking](./your-filename.jpeg)
+
+### Booking Confirmation Email
+![Booking Confirmation Email](./your-filename.jpeg)
+
+### Medication Review Alert Email
+![Medication Alert](./your-filename.jpeg)
+
+### Weekly Reminder Email
+![Weekly Reminder](./your-filename.jpeg)
