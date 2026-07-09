@@ -1,0 +1,34 @@
+Doctor Name,Specialty,Day,Clinic Room/Location,Time Slot
+Dr. Adams,Cardiology,Monday,"Room 204, Cardiology Wing",9:00 AM
+Dr. Adams,Cardiology,Monday,"Room 204, Cardiology Wing",10:00 AM
+Dr. Adams,Cardiology,Monday,"Room 204, Cardiology Wing",11:00 AM
+Dr. Adams,Cardiology,Wednesday,"Room 110, Outpatient Wing",1:00 PM
+Dr. Adams,Cardiology,Wednesday,"Room 110, Outpatient Wing",2:00 PM
+Dr. Adams,Cardiology,Wednesday,"Room 110, Outpatient Wing",3:00 PM
+Dr. Chen,Pediatrics,Tuesday,"Room 305, Pediatric Wing",10:00 AM
+Dr. Chen,Pediatrics,Tuesday,"Room 305, Pediatric Wing",11:00 AM
+Dr. Chen,Pediatrics,Tuesday,"Room 305, Pediatric Wing",12:00 PM
+Dr. Chen,Pediatrics,Friday,"Room 305, Pediatric Wing",10:00 AM
+Dr. Chen,Pediatrics,Friday,"Room 305, Pediatric Wing",11:00 AM
+Dr. Bello,Dermatology,Monday,"Room 150, Dermatology Unit",2:00 PM
+Dr. Bello,Dermatology,Monday,"Room 150, Dermatology Unit",3:00 PM
+Dr. Bello,Dermatology,Thursday,"Room 150, Dermatology Unit",9:00 AM
+Dr. Bello,Dermatology,Thursday,"Room 150, Dermatology Unit",10:00 AM
+Dr. Okafor,General Practice,Monday,"Room 101, Outpatient Wing",8:00 AM
+Dr. Okafor,General Practice,Monday,"Room 101, Outpatient Wing",9:00 AM
+Dr. Okafor,General Practice,Tuesday,"Room 101, Outpatient Wing",8:00 AM
+Dr. Okafor,General Practice,Wednesday,"Room 101, Outpatient Wing",8:00 AM
+Dr. Okafor,General Practice,Thursday,"Room 101, Outpatient Wing",8:00 AM
+Dr. Okafor,General Practice,Friday,"Room 101, Outpatient Wing",8:00 AM
+Dr. Musa,Orthopedics,Wednesday,"Room 220, Orthopedic Wing",9:00 AM
+Dr. Musa,Orthopedics,Wednesday,"Room 220, Orthopedic Wing",10:00 AM
+Dr. Musa,Orthopedics,Friday,"Room 220, Orthopedic Wing",1:00 PM
+Dr. Musa,Orthopedics,Friday,"Room 220, Orthopedic Wing",2:00 PM
+Dr. Eze,Gynecology,Tuesday,"Room 312, Women's Health Wing",9:00 AM
+Dr. Eze,Gynecology,Tuesday,"Room 312, Women's Health Wing",10:00 AM
+Dr. Eze,Gynecology,Thursday,"Room 312, Women's Health Wing",1:00 PM
+Dr. Eze,Gynecology,Thursday,"Room 312, Women's Health Wing",2:00 PM
+Dr. Yusuf,Dentistry,Monday,"Room 130, Dental Unit",10:00 AM
+Dr. Yusuf,Dentistry,Monday,"Room 130, Dental Unit",11:00 AM
+Dr. Yusuf,Dentistry,Wednesday,"Room 130, Dental Unit",10:00 AM
+Dr. Yusuf,Dentistry,Friday,"Room 130, Dental Unit",10:00 AM

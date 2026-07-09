@@ -1,0 +1,2 @@
+Patient Name,Patient Email,Age,Conditions,Medications,Allergies,Risk Level,Interactions Found,Contraindications,Recommendations,Clinical Summary,Review Date
+Jane Doe,jane.doe@example.com,45,"Hypertension, Type 2 Diabetes","Metformin 500mg twice daily, Lisinopril 10mg once daily",Penicillin,LOW,None identified,None identified,Continue current regimen and monitor blood pressure regularly.,Patient's current medications show no significant interactions. Routine monitoring of blood glucose and blood pressure is recommended.,2026-06-10

@@ -1,0 +1,3 @@
+Patient Name,Patient Email,Doctor,Day,Time Slot,Location,Queue Number,Status,Booking Date
+Jane Doe,jane.doe@example.com,Dr. Adams,Monday,9:00 AM,"Room 204, Cardiology Wing",1,Booked,2026-06-15
+John Smith,john.smith@example.com,Dr. Chen,Tuesday,10:00 AM,"Room 305, Pediatric Wing",1,Completed,2026-06-09
