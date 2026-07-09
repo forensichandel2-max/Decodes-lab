@@ -74,14 +74,14 @@ Built by Emmanuel Obidigbo — Pharmacist & AI Automation Specialist
 
 ## Screenshots
 
-### Appointment Booking Chat
-![Appointment Booking](./your-filename.jpeg)
+### Medium Risk Medication Review
+![Appointment Booking](./Medium_risk.jpeg)
 
 ### Booking Confirmation Email
-![Booking Confirmation Email](./your-filename.jpeg)
+![Booking Confirmation Email](./Appointment_booked.jpeg)
 
-### Medication Review Alert Email
-![Medication Alert](./your-filename.jpeg)
+### High Risk Medication Review Alert Email
+![Medication Alert](./High_risk.jpeg)
 
 ### Weekly Reminder Email
-![Weekly Reminder](./your-filename.jpeg)
+![Weekly Reminder](./Appointment_reminder.jpeg)
