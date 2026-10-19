@@ -1,5 +1,9 @@
 # Ai-Automation Portfolio
- Ai automation projects 
+ I’m Emmanuel Obidigbo, a Doctor of Pharmacy graduate from the University of Nigeria, Nsukka, passionate about healthcare innovation and AI automation.
+
+I build AI-powered workflows, agents, and chatbots using n8n, Make.com, and Zapier to automate business processes, improve efficiency, and solve real-world problems.
+
+My goal is to bridge healthcare and technology through intelligent automation. 
 
 ## Projects
 - [AI Career Advisor](./ai-career-advisor) — AI-powered automation that recommends personalized learning roadmaps based on user goals
